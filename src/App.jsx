@@ -33,6 +33,26 @@ function App() {
     setShowPreview(true);
   };
 
+  const handleThemePreview = (themeId) => {
+    const sampleQuestions = [
+      {
+        question: "¿Cuál es el planeta conocido como el Planeta Rojo?",
+        options: ["Tierra", "Marte", "Júpiter", "Venus"],
+        correct: 1,
+        explanation: "Marte es llamado el 'Planeta Rojo' debido a su apariencia rojiza."
+      },
+      {
+        question: "¿Cuál es la capital de Francia?",
+        options: ["Londres", "Berlín", "Madrid", "París"],
+        correct: 3,
+        explanation: "París es la capital y ciudad más poblada de Francia."
+      }
+    ];
+    const html = generateQuizHtml("Vista Previa del Tema", sampleQuestions, themeId);
+    setPreviewHtml(html);
+    setShowPreview(true);
+  };
+
   const handleGenerate = async () => {
     if (!isValid || !title) return;
 
@@ -91,7 +111,12 @@ function App() {
             {/* Right Panel - Customization */}
             <div className="lg:col-span-4 flex flex-col gap-6 h-full overflow-y-auto pb-6">
               <div className={`flex-1 rounded-3xl p-6 border backdrop-blur-sm shadow-xl transition-colors duration-300 ${darkMode ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'}`}>
-                <ThemeSelector currentTheme={theme} setTheme={setTheme} darkMode={darkMode} />
+                <ThemeSelector
+                  currentTheme={theme}
+                  setTheme={setTheme}
+                  onPreview={handleThemePreview}
+                  darkMode={darkMode}
+                />
               </div>
 
               <div className="mt-auto flex flex-col gap-3">
