@@ -162,18 +162,18 @@ En el directorio del proyecto, puedes ejecutar:
 
 ### `npm run dev`
 
-Inicia la aplicación en modo desarrollo.\
+Inicia la aplicación en modo desarrollo.
 Abre [http://localhost:5173](http://localhost:5173) para verla en tu navegador.
 
-La página se recargará automáticamente cuando hagas cambios.\
+La página se recargará automáticamente cuando hagas cambios.
 También verás errores de lint en la consola.
 
 ### `npm run build`
 
-Construye la aplicación para producción en la carpeta `dist`.\
+Construye la aplicación para producción en la carpeta `dist`.
 Optimiza la construcción para el mejor rendimiento.
 
-Los archivos se minimizan y los nombres incluyen hashes.\
+Los archivos se minimizan y los nombres incluyen hashes.
 Tu aplicación está lista para ser desplegada!
 
 ### `npm run preview`
