@@ -44,8 +44,8 @@ const ThemeCard = ({ id, name, description, active, onClick, onPreview, previewC
                 onPreview(id);
             }}
             className={`absolute top-4 right-4 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 ${active
-                    ? 'text-indigo-500 hover:bg-indigo-500/10'
-                    : (darkMode ? 'text-gray-400 hover:bg-white/10 hover:text-white' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-900')
+                ? 'text-indigo-500 hover:bg-indigo-500/10'
+                : (darkMode ? 'text-gray-400 hover:bg-white/10 hover:text-white' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-900')
                 }`}
             title="Vista previa del tema"
         >
@@ -77,6 +77,16 @@ const ThemeSelector = ({ currentTheme, setTheme, onPreview, darkMode }) => {
                     onClick={setTheme}
                     onPreview={onPreview}
                     previewColors={['#09090b', '#22c55e', '#e4e4e7']}
+                    darkMode={darkMode}
+                />
+                <ThemeCard
+                    id="neon-blue"
+                    name="Neon Blue"
+                    description="Estilo futurista con tonos azules brillantes y diseño en cuadrícula."
+                    active={currentTheme === 'neon-blue'}
+                    onClick={setTheme}
+                    onPreview={onPreview}
+                    previewColors={['#0f172a', '#06b6d4', '#f8fafc']}
                     darkMode={darkMode}
                 />
             </div>

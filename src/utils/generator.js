@@ -1,8 +1,8 @@
 
 export const generateQuizHtml = (title, questions, theme) => {
-    const themeStyles = getThemeStyles(theme);
+  const themeStyles = getThemeStyles(theme);
 
-    const htmlContent = `
+  const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -108,7 +108,6 @@ export const generateQuizHtml = (title, questions, theme) => {
       padding: 15px;
       border-radius: 8px;
       background-color: rgba(0,0,0,0.05);
-      display: none;
     }
     
     .feedback.visible { display: block; }
@@ -137,6 +136,33 @@ export const generateQuizHtml = (title, questions, theme) => {
     ${theme === 'cyberpunk' ? `
       .card { box-shadow: 0 0 20px var(--accent-color); border: 1px solid var(--accent-color); }
       .option-btn { font-family: 'Courier New', monospace; }
+    ` : ''}
+
+    ${theme === 'neon-blue' ? `
+      .card { 
+        box-shadow: 0 0 25px rgba(var(--accent-rgb), 0.3); 
+        border: 1px solid rgba(var(--accent-rgb), 0.5);
+        background: linear-gradient(145deg, var(--card-bg) 0%, #0f172a 100%);
+      }
+      .options-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+      .option-btn {
+        border-radius: 8px;
+        border: 1px solid rgba(var(--accent-rgb), 0.3);
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 80px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+      .option-btn:hover:not(:disabled) {
+        box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.4);
+        transform: translateY(-2px);
+      }
+      h1 { text-shadow: 0 0 10px rgba(var(--accent-rgb), 0.5); }
     ` : ''}
 
     .footer {
@@ -327,29 +353,40 @@ export const generateQuizHtml = (title, questions, theme) => {
 </html>
   `;
 
-    return htmlContent;
+  return htmlContent;
 };
 
 const getThemeStyles = (theme) => {
-    if (theme === 'cyberpunk') {
-        return {
-            bgColor: '#09090b',
-            textColor: '#e4e4e7',
-            cardBg: '#18181b',
-            accentColor: '#22c55e', // Green neon
-            secondaryText: '#a1a1aa',
-            borderColor: '#27272a',
-            accentRgb: '34, 197, 94'
-        };
-    }
-    // Default: Zen Minimalist
+  if (theme === 'cyberpunk') {
     return {
-        bgColor: '#f8fafc',
-        textColor: '#1e293b',
-        cardBg: '#ffffff',
-        accentColor: '#3b82f6', // Blue
-        secondaryText: '#64748b',
-        borderColor: '#e2e8f0',
-        accentRgb: '59, 130, 246'
+      bgColor: '#09090b',
+      textColor: '#e4e4e7',
+      cardBg: '#18181b',
+      accentColor: '#22c55e', // Green neon
+      secondaryText: '#a1a1aa',
+      borderColor: '#27272a',
+      accentRgb: '34, 197, 94'
     };
+  }
+  if (theme === 'neon-blue') {
+    return {
+      bgColor: '#020617', // Very dark blue
+      textColor: '#e2e8f0',
+      cardBg: '#1e293b',
+      accentColor: '#06b6d4', // Cyan
+      secondaryText: '#94a3b8',
+      borderColor: '#334155',
+      accentRgb: '6, 182, 212'
+    };
+  }
+  // Default: Zen Minimalist
+  return {
+    bgColor: '#f8fafc',
+    textColor: '#1e293b',
+    cardBg: '#ffffff',
+    accentColor: '#3b82f6', // Blue
+    secondaryText: '#64748b',
+    borderColor: '#e2e8f0',
+    accentRgb: '59, 130, 246'
+  };
 };
