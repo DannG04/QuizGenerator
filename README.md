@@ -29,6 +29,8 @@ npm --version
 
 ## 📦 Instalación
 
+### Opción 1: Desarrollo Local
+
 1. **Clona el repositorio**:
    ```bash
    git clone https://github.com/DannG04/QuizGenerator.git
@@ -46,6 +48,25 @@ npm --version
    ```
 
 4. **Abre tu navegador** en la URL que se muestra en la terminal (normalmente `http://localhost:5173`)
+
+### Opción 2: Despliegue con Docker 🐳
+
+Si prefieres usar Docker para ejecutar la aplicación:
+
+1. **Clona el repositorio**:
+   ```bash
+   git clone https://github.com/DannG04/QuizGenerator.git
+   cd QuizGenerator
+   ```
+
+2. **Inicia con Docker Compose**:
+   ```bash
+   docker compose up -d --build
+   ```
+
+3. **Abre tu navegador** en `http://localhost:8080`
+
+Para más detalles sobre el despliegue con Docker, consulta [DOCKER.md](DOCKER.md).
 
 ## 💡 Uso
 
