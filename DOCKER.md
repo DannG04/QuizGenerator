@@ -86,9 +86,13 @@ The Dockerfile uses a multi-stage build approach:
 
 The NGINX configuration includes:
 - SPA routing support (redirects all routes to index.html)
-- Gzip compression for better performance
-- Security headers (X-Frame-Options, X-Content-Type-Options, X-XSS-Protection)
+- Gzip compression for better performance (including fonts)
+- Security headers:
+  - X-Frame-Options: SAMEORIGIN (prevents clickjacking)
+  - X-Content-Type-Options: nosniff (prevents MIME sniffing)
+  - Content-Security-Policy (modern XSS protection)
 - Static asset caching (1 year for JS/CSS/images)
+- No-cache headers for HTML (ensures fresh content)
 - Health check endpoint
 
 ## Troubleshooting
