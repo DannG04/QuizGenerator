@@ -89,6 +89,16 @@ const ThemeSelector = ({ currentTheme, setTheme, onPreview, darkMode }) => {
                     previewColors={['#0f172a', '#06b6d4', '#f8fafc']}
                     darkMode={darkMode}
                 />
+                <ThemeCard
+                    id="pink-dream"
+                    name="Pink Dream"
+                    description="Diseño romántico con gradientes rosas suaves, glassmorphism y animaciones elegantes."
+                    active={currentTheme === 'pink-dream'}
+                    onClick={setTheme}
+                    onPreview={onPreview}
+                    previewColors={['#fdf2f8', '#ec4899', '#f9a8d4']}
+                    darkMode={darkMode}
+                />
             </div>
         </div>
     );
