@@ -99,6 +99,16 @@ const ThemeSelector = ({ currentTheme, setTheme, onPreview, darkMode }) => {
                     previewColors={['#fdf2f8', '#ec4899', '#f9a8d4']}
                     darkMode={darkMode}
                 />
+                <ThemeCard
+                    id="formal-legal"
+                    name="Formal Legal"
+                    description="Tema profesional y elegante para materias de derecho y legislación con tipografía serif."
+                    active={currentTheme === 'formal-legal'}
+                    onClick={setTheme}
+                    onPreview={onPreview}
+                    previewColors={['#f8f9fa', '#1e3a5f', '#d4af37']}
+                    darkMode={darkMode}
+                />
             </div>
         </div>
     );

@@ -387,6 +387,140 @@ export const generateQuizHtml = (title, questions, theme) => {
       }
     ` : ''}
 
+    ${theme === 'formal-legal' ? `
+      body {
+        font-family: 'Georgia', 'Times New Roman', serif;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      }
+      
+      .card {
+        border: 2px solid var(--border-color);
+        box-shadow: 0 8px 24px rgba(30, 58, 95, 0.12);
+        background: var(--card-bg);
+      }
+      
+      h1 {
+        font-family: 'Georgia', 'Times New Roman', serif;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-size: 1.75rem;
+        border-bottom: 3px solid var(--border-color);
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+      }
+      
+      .question-count {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 8px;
+        padding: 8px 16px;
+        display: inline-block;
+        font-family: 'Georgia', serif;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+      
+      .question-text {
+        font-family: 'Georgia', 'Times New Roman', serif;
+        font-size: 1.15rem;
+        line-height: 1.7;
+        font-weight: 500;
+        margin-bottom: 30px;
+        color: var(--text-color);
+        text-align: justify;
+      }
+      
+      .option-btn {
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        border: 2px solid rgba(212, 175, 55, 0.3);
+        border-radius: 8px;
+        padding: 18px 20px;
+        font-family: 'Georgia', 'Times New Roman', serif;
+        font-size: 1rem;
+        line-height: 1.6;
+        font-weight: 400;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(30, 58, 95, 0.08);
+      }
+      
+      .option-btn:hover:not(:disabled) {
+        border-color: var(--border-color);
+        background: linear-gradient(135deg, #fff, #fefefe);
+        box-shadow: 0 4px 12px rgba(30, 58, 95, 0.15);
+        transform: translateY(-2px);
+      }
+      
+      .option-btn.selected {
+        background: linear-gradient(135deg, var(--accent-color), #2c5282);
+        border-color: var(--accent-color);
+        box-shadow: 0 4px 16px rgba(30, 58, 95, 0.3);
+      }
+      
+      .option-btn.correct {
+        background: linear-gradient(135deg, #1e3a5f, #2c5282);
+        border-color: var(--border-color);
+        box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+      }
+      
+      .option-btn.incorrect {
+        background: linear-gradient(135deg, #8b0000, #a52a2a);
+        border-color: #8b0000;
+      }
+      
+      .feedback {
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        border: 2px solid rgba(212, 175, 55, 0.3);
+        border-radius: 8px;
+        padding: 18px;
+        font-family: 'Georgia', 'Times New Roman', serif;
+        line-height: 1.6;
+        box-shadow: 0 2px 12px rgba(30, 58, 95, 0.1);
+      }
+      
+      .feedback.success {
+        border-left: 4px solid var(--border-color);
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(212, 175, 55, 0.03));
+      }
+      
+      .feedback.error {
+        border-left: 4px solid #8b0000;
+        background: linear-gradient(135deg, rgba(139, 0, 0, 0.08), rgba(139, 0, 0, 0.03));
+      }
+      
+      .next-btn, .restart-btn {
+        background: linear-gradient(135deg, var(--accent-color), #2c5282);
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-family: 'Georgia', 'Times New Roman', serif;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        box-shadow: 0 4px 12px rgba(30, 58, 95, 0.2);
+        transition: all 0.3s ease;
+      }
+      
+      .next-btn:hover, .restart-btn:hover {
+        background: linear-gradient(135deg, #2c5282, var(--accent-color));
+        box-shadow: 0 6px 16px rgba(30, 58, 95, 0.3);
+        transform: translateY(-2px);
+      }
+      
+      #final-score {
+        font-family: 'Georgia', 'Times New Roman', serif;
+        font-weight: 700;
+        color: var(--accent-color);
+        text-shadow: 0 2px 8px rgba(30, 58, 95, 0.2);
+      }
+      
+      .footer {
+        font-family: 'Georgia', 'Times New Roman', serif;
+        border-top: 1px solid rgba(212, 175, 55, 0.3);
+        padding-top: 20px;
+        margin-top: 40px;
+      }
+    ` : ''}
+
     .footer {
       margin-top: 40px;
       text-align: center;
@@ -610,6 +744,17 @@ const getThemeStyles = (theme) => {
       secondaryText: '#9d174d', // Medium pink
       borderColor: '#f9a8d4',
       accentRgb: '236, 72, 153'
+    };
+  }
+  if (theme === 'formal-legal') {
+    return {
+      bgColor: '#f8f9fa', // Very light gray
+      textColor: '#1e3a5f', // Dark blue
+      cardBg: '#ffffff',
+      accentColor: '#1e3a5f', // Dark blue for formal appearance
+      secondaryText: '#6c757d', // Gray
+      borderColor: '#d4af37', // Gold border
+      accentRgb: '30, 58, 95'
     };
   }
   // Default: Zen Minimalist
