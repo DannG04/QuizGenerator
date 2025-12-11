@@ -577,6 +577,8 @@ export const generateQuizHtml = (title, questions, theme) => {
   let currentQuestionIndex = 0;
   let score = 0;
   let isAnswered = false;
+  let selectedMatches = {};
+  let selectedMultiple = new Set();
 
   const els = {
     quizScreen: document.getElementById('quiz-screen'),
@@ -592,6 +594,16 @@ export const generateQuizHtml = (title, questions, theme) => {
     scoreFraction: document.getElementById('score-fraction')
   };
 
+  // Función para mezclar arrays
+  function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
   function init() {
     els.totalQ.textContent = questions.length;
     loadQuestion();
@@ -599,27 +611,197 @@ export const generateQuizHtml = (title, questions, theme) => {
 
   function loadQuestion() {
     isAnswered = false;
+    selectedMatches = {};
+    selectedMultiple = new Set();
     const q = questions[currentQuestionIndex];
+    const type = q.type || 'multiple-choice';
+    
     els.currentQ.textContent = currentQuestionIndex + 1;
     els.questionText.textContent = q.question;
     els.optionsContainer.innerHTML = '';
     els.feedbackArea.classList.add('hidden');
     els.nextBtn.classList.add('hidden');
 
-    q.options.forEach((opt, idx) => {
+    // Renderizar según el tipo de pregunta
+    switch(type) {
+      case 'true-false':
+        renderTrueFalse(q);
+        break;
+      case 'multiple-select':
+        renderMultipleSelect(q);
+        break;
+      case 'matching':
+        renderMatching(q);
+        break;
+      case 'fill-blank':
+        renderFillBlank(q);
+        break;
+      default: // 'multiple-choice'
+        renderMultipleChoice(q);
+    }
+  }
+
+  function renderMultipleChoice(q) {
+    // Crear array de opciones con índices originales
+    const optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, originalIndex: idx }));
+    // Mezclar opciones
+    const shuffledOptions = shuffleArray(optionsWithIndex);
+    
+    shuffledOptions.forEach(({ text, originalIndex }) => {
       const btn = document.createElement('button');
       btn.className = 'option-btn';
-      btn.textContent = opt;
-      btn.onclick = () => handleAnswer(idx, btn);
+      btn.textContent = text;
+      btn.onclick = () => handleMultipleChoice(originalIndex, btn, q);
       els.optionsContainer.appendChild(btn);
     });
   }
 
-  function handleAnswer(selectedIndex, btn) {
+  function renderTrueFalse(q) {
+    const options = shuffleArray([
+      { text: 'Verdadero', value: true },
+      { text: 'Falso', value: false }
+    ]);
+    
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = opt.text;
+      btn.onclick = () => handleTrueFalse(opt.value, btn, q);
+      els.optionsContainer.appendChild(btn);
+    });
+  }
+
+  function renderMultipleSelect(q) {
+    const optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, originalIndex: idx }));
+    const shuffledOptions = shuffleArray(optionsWithIndex);
+    
+    shuffledOptions.forEach(({ text, originalIndex }) => {
+      const label = document.createElement('label');
+      label.className = 'option-btn';
+      label.style.cursor = 'pointer';
+      label.style.display = 'flex';
+      label.style.alignItems = 'center';
+      label.style.gap = '10px';
+      
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.style.width = '20px';
+      checkbox.style.height = '20px';
+      checkbox.style.cursor = 'pointer';
+      checkbox.onchange = () => {
+        if (checkbox.checked) {
+          selectedMultiple.add(originalIndex);
+          label.classList.add('selected');
+        } else {
+          selectedMultiple.delete(originalIndex);
+          label.classList.remove('selected');
+        }
+      };
+      
+      label.appendChild(checkbox);
+      label.appendChild(document.createTextNode(text));
+      els.optionsContainer.appendChild(label);
+    });
+    
+    const submitBtn = document.createElement('button');
+    submitBtn.className = 'next-btn';
+    submitBtn.style.marginTop = '20px';
+    submitBtn.textContent = 'Confirmar Selección';
+    submitBtn.onclick = () => handleMultipleSelect(q);
+    els.optionsContainer.appendChild(submitBtn);
+  }
+
+  function renderMatching(q) {
+    const container = document.createElement('div');
+    container.style.display = 'grid';
+    container.style.gap = '15px';
+    
+    const pairs = q.pairs || [];
+    const definitions = shuffleArray(pairs.map(p => p.definition));
+    
+    pairs.forEach((pair, idx) => {
+      const pairDiv = document.createElement('div');
+      pairDiv.style.display = 'grid';
+      pairDiv.style.gridTemplateColumns = '1fr 1fr';
+      pairDiv.style.gap = '10px';
+      pairDiv.style.alignItems = 'center';
+      
+      const termDiv = document.createElement('div');
+      termDiv.className = 'option-btn';
+      termDiv.style.cursor = 'default';
+      termDiv.style.fontWeight = 'bold';
+      termDiv.textContent = pair.term;
+      
+      const select = document.createElement('select');
+      select.className = 'option-btn';
+      select.style.cursor = 'pointer';
+      select.innerHTML = '<option value="">-- Selecciona --</option>';
+      
+      definitions.forEach((def, defIdx) => {
+        const option = document.createElement('option');
+        option.value = def;
+        option.textContent = def;
+        select.appendChild(option);
+      });
+      
+      select.onchange = () => {
+        selectedMatches[idx] = select.value;
+      };
+      
+      pairDiv.appendChild(termDiv);
+      pairDiv.appendChild(select);
+      container.appendChild(pairDiv);
+    });
+    
+    els.optionsContainer.appendChild(container);
+    
+    const submitBtn = document.createElement('button');
+    submitBtn.className = 'next-btn';
+    submitBtn.style.marginTop = '20px';
+    submitBtn.textContent = 'Confirmar Respuestas';
+    submitBtn.onclick = () => handleMatching(q);
+    els.optionsContainer.appendChild(submitBtn);
+  }
+
+  function renderFillBlank(q) {
+    const parts = q.question.split('___');
+    const container = document.createElement('div');
+    container.style.fontSize = '1.1rem';
+    container.style.lineHeight = '2';
+    
+    parts.forEach((part, idx) => {
+      const span = document.createElement('span');
+      span.textContent = part;
+      container.appendChild(span);
+      
+      if (idx < parts.length - 1) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'option-btn';
+        input.style.display = 'inline-block';
+        input.style.width = '200px';
+        input.style.margin = '0 5px';
+        input.style.textAlign = 'center';
+        input.dataset.index = idx;
+        container.appendChild(input);
+      }
+    });
+    
+    els.questionText.innerHTML = '';
+    els.questionText.appendChild(container);
+    
+    const submitBtn = document.createElement('button');
+    submitBtn.className = 'next-btn';
+    submitBtn.style.marginTop = '20px';
+    submitBtn.textContent = 'Confirmar Respuesta';
+    submitBtn.onclick = () => handleFillBlank(q);
+    els.optionsContainer.appendChild(submitBtn);
+  }
+
+  function handleMultipleChoice(selectedIndex, btn, q) {
     if (isAnswered) return;
     isAnswered = true;
 
-    const q = questions[currentQuestionIndex];
     const isCorrect = selectedIndex === q.correct;
     const buttons = els.optionsContainer.querySelectorAll('.option-btn');
 
@@ -630,12 +812,173 @@ export const generateQuizHtml = (title, questions, theme) => {
       triggerConfetti();
     } else {
       btn.classList.add('incorrect');
-      buttons[q.correct].classList.add('correct');
+      // Encontrar y marcar la respuesta correcta
+      buttons.forEach(b => {
+        if (b.textContent === q.options[q.correct]) {
+          b.classList.add('correct');
+        }
+      });
       showFeedback(false, "Incorrecto. " + (q.explanation || ""));
     }
 
-    // Disable all buttons
     buttons.forEach(b => b.disabled = true);
+    els.nextBtn.classList.remove('hidden');
+    
+    if (currentQuestionIndex === questions.length - 1) {
+      els.nextBtn.textContent = "Ver Resultados";
+    }
+  }
+
+  function handleTrueFalse(selectedValue, btn, q) {
+    if (isAnswered) return;
+    isAnswered = true;
+
+    const isCorrect = selectedValue === q.correct;
+    const buttons = els.optionsContainer.querySelectorAll('.option-btn');
+
+    if (isCorrect) {
+      score++;
+      btn.classList.add('correct');
+      showFeedback(true, "¡Correcto! " + (q.explanation || ""));
+      triggerConfetti();
+    } else {
+      btn.classList.add('incorrect');
+      buttons.forEach(b => {
+        if ((b.textContent === 'Verdadero' && q.correct === true) ||
+            (b.textContent === 'Falso' && q.correct === false)) {
+          b.classList.add('correct');
+        }
+      });
+      showFeedback(false, "Incorrecto. " + (q.explanation || ""));
+    }
+
+    buttons.forEach(b => b.disabled = true);
+    els.nextBtn.classList.remove('hidden');
+    
+    if (currentQuestionIndex === questions.length - 1) {
+      els.nextBtn.textContent = "Ver Resultados";
+    }
+  }
+
+  function handleMultipleSelect(q) {
+    if (isAnswered) return;
+    isAnswered = true;
+
+    const correctSet = new Set(q.correct);
+    const isCorrect = correctSet.size === selectedMultiple.size && 
+                      [...correctSet].every(x => selectedMultiple.has(x));
+
+    const labels = els.optionsContainer.querySelectorAll('label.option-btn');
+    
+    labels.forEach((label, idx) => {
+      const checkbox = label.querySelector('input[type="checkbox"]');
+      checkbox.disabled = true;
+      
+      const optionText = label.textContent.trim();
+      const originalIndex = q.options.findIndex(opt => optionText.includes(opt));
+      
+      if (correctSet.has(originalIndex)) {
+        label.classList.add('correct');
+      } else if (selectedMultiple.has(originalIndex)) {
+        label.classList.add('incorrect');
+      }
+    });
+
+    if (isCorrect) {
+      score++;
+      showFeedback(true, "¡Correcto! " + (q.explanation || ""));
+      triggerConfetti();
+    } else {
+      showFeedback(false, "Incorrecto. " + (q.explanation || ""));
+    }
+
+    els.nextBtn.classList.remove('hidden');
+    
+    if (currentQuestionIndex === questions.length - 1) {
+      els.nextBtn.textContent = "Ver Resultados";
+    }
+  }
+
+  function handleMatching(q) {
+    if (isAnswered) return;
+    isAnswered = true;
+
+    const pairs = q.pairs || [];
+    let correctCount = 0;
+
+    pairs.forEach((pair, idx) => {
+      if (selectedMatches[idx] === pair.definition) {
+        correctCount++;
+      }
+    });
+
+    const isCorrect = correctCount === pairs.length;
+    const selects = els.optionsContainer.querySelectorAll('select');
+    
+    selects.forEach((select, idx) => {
+      select.disabled = true;
+      const parentDiv = select.parentElement;
+      
+      if (selectedMatches[idx] === pairs[idx].definition) {
+        parentDiv.style.backgroundColor = 'rgba(34, 197, 94, 0.1)';
+        parentDiv.style.border = '2px solid #22c55e';
+      } else {
+        parentDiv.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+        parentDiv.style.border = '2px solid #ef4444';
+      }
+    });
+
+    if (isCorrect) {
+      score++;
+      showFeedback(true, "¡Correcto! Todas las coincidencias son correctas. " + (q.explanation || ""));
+      triggerConfetti();
+    } else {
+      showFeedback(false, \`Parcialmente correcto: \${correctCount}/\${pairs.length} correctas. \` + (q.explanation || ""));
+    }
+
+    els.nextBtn.classList.remove('hidden');
+    
+    if (currentQuestionIndex === questions.length - 1) {
+      els.nextBtn.textContent = "Ver Resultados";
+    }
+  }
+
+  function handleFillBlank(q) {
+    if (isAnswered) return;
+    isAnswered = true;
+
+    const inputs = els.questionText.querySelectorAll('input[type="text"]');
+    const answers = q.answers || [];
+    let correctCount = 0;
+
+    inputs.forEach((input, idx) => {
+      input.disabled = true;
+      const userAnswer = input.value.trim().toLowerCase();
+      const correctAnswer = answers[idx].toLowerCase();
+      
+      if (userAnswer === correctAnswer) {
+        correctCount++;
+        input.style.backgroundColor = '#22c55e';
+        input.style.color = 'white';
+        input.style.borderColor = '#22c55e';
+      } else {
+        input.style.backgroundColor = '#ef4444';
+        input.style.color = 'white';
+        input.style.borderColor = '#ef4444';
+        input.value = userAnswer + ' ❌ (' + answers[idx] + ')';
+      }
+    });
+
+    const isCorrect = correctCount === answers.length;
+
+    if (isCorrect) {
+      score++;
+      showFeedback(true, "¡Correcto! " + (q.explanation || ""));
+      triggerConfetti();
+    } else {
+      showFeedback(false, \`Parcialmente correcto: \${correctCount}/\${answers.length} correctas. \` + (q.explanation || ""));
+    }
+
     els.nextBtn.classList.remove('hidden');
     
     if (currentQuestionIndex === questions.length - 1) {

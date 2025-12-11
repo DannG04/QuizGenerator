@@ -22,20 +22,79 @@ const EditorPanel = ({ title, setTitle, jsonInput, setJsonInput, setQuestions, s
             const parsed = JSON.parse(input);
             if (!Array.isArray(parsed)) throw new Error('La raíz debe ser un array');
 
-            const validQuestions = parsed.every(q =>
-                q.question &&
-                Array.isArray(q.options) &&
-                q.options.length >= 2 &&
-                typeof q.correct === 'number'
-            );
+            const validQuestions = parsed.every((q, index) => {
+                // Validar que tenga pregunta
+                if (!q.question || typeof q.question !== 'string') {
+                    throw new Error(`Pregunta ${index + 1}: falta el campo "question"`);
+                }
+
+                const type = q.type || 'multiple-choice';
+
+                // Validar según el tipo
+                switch(type) {
+                    case 'multiple-choice':
+                        if (!Array.isArray(q.options) || q.options.length < 2) {
+                            throw new Error(`Pregunta ${index + 1}: "options" debe ser un array con al menos 2 elementos`);
+                        }
+                        if (typeof q.correct !== 'number' || q.correct < 0 || q.correct >= q.options.length) {
+                            throw new Error(`Pregunta ${index + 1}: "correct" debe ser un índice válido`);
+                        }
+                        break;
+
+                    case 'true-false':
+                        if (typeof q.correct !== 'boolean') {
+                            throw new Error(`Pregunta ${index + 1}: "correct" debe ser true o false`);
+                        }
+                        break;
+
+                    case 'multiple-select':
+                        if (!Array.isArray(q.options) || q.options.length < 2) {
+                            throw new Error(`Pregunta ${index + 1}: "options" debe ser un array con al menos 2 elementos`);
+                        }
+                        if (!Array.isArray(q.correct) || q.correct.length === 0) {
+                            throw new Error(`Pregunta ${index + 1}: "correct" debe ser un array de índices`);
+                        }
+                        if (!q.correct.every(idx => typeof idx === 'number' && idx >= 0 && idx < q.options.length)) {
+                            throw new Error(`Pregunta ${index + 1}: todos los índices en "correct" deben ser válidos`);
+                        }
+                        break;
+
+                    case 'matching':
+                        if (!Array.isArray(q.pairs) || q.pairs.length < 2) {
+                            throw new Error(`Pregunta ${index + 1}: "pairs" debe ser un array con al menos 2 elementos`);
+                        }
+                        if (!q.pairs.every(p => p.term && p.definition)) {
+                            throw new Error(`Pregunta ${index + 1}: cada par debe tener "term" y "definition"`);
+                        }
+                        break;
+
+                    case 'fill-blank':
+                        if (!q.question.includes('___')) {
+                            throw new Error(`Pregunta ${index + 1}: debe contener al menos un espacio "___"`);
+                        }
+                        if (!Array.isArray(q.answers) || q.answers.length === 0) {
+                            throw new Error(`Pregunta ${index + 1}: "answers" debe ser un array con las respuestas`);
+                        }
+                        const blanksCount = (q.question.match(/___/g) || []).length;
+                        if (q.answers.length !== blanksCount) {
+                            throw new Error(`Pregunta ${index + 1}: número de respuestas (${q.answers.length}) no coincide con espacios (${blanksCount})`);
+                        }
+                        break;
+
+                    default:
+                        throw new Error(`Pregunta ${index + 1}: tipo "${type}" no es válido`);
+                }
+
+                return true;
+            });
 
             if (!validQuestions) throw new Error('Estructura de pregunta inválida');
 
-            setValidationStatus({ valid: true, message: `JSON Válido: ${parsed.length} Preguntas` });
+            setValidationStatus({ valid: true, message: `✓ ${parsed.length} pregunta${parsed.length !== 1 ? 's' : ''} válida${parsed.length !== 1 ? 's' : ''}` });
             setQuestions(parsed);
             setIsValid(true);
         } catch (e) {
-            setValidationStatus({ valid: false, message: 'Formato Inválido' });
+            setValidationStatus({ valid: false, message: e.message || 'Formato Inválido' });
             setIsValid(false);
         }
     };
