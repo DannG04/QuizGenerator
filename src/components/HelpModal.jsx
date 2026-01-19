@@ -94,7 +94,10 @@ const HelpModal = ({ isOpen, onClose, darkMode }) => {
 ]`
     };
 
-    const aiPrompt = `Genera un array de objetos JSON para un quiz sobre [TU_TEMA].
+    const aiPrompt = `EJEMPLO DE USO:
+"Basándote en las fuentes adjuntas, genérame preguntas en formato JSON de diferentes tipos sobre [TU_TEMA]"
+
+Genera un array de objetos JSON para un quiz sobre [TU_TEMA].
 
 TIPOS DE PREGUNTAS DISPONIBLES:
 
@@ -145,7 +148,7 @@ TIPOS DE PREGUNTAS DISPONIBLES:
 
 IMPORTANTE: Las respuestas se mostrarán en orden ALEATORIO cada vez.
 
-Genera 5-10 preguntas mezclando diferentes tipos. Responde SOLO con el JSON.`;
+INSTRUCCIÓN: Genera 5-10 preguntas mezclando diferentes tipos de pregunta. Responde SOLO con el JSON válido, sin texto adicional.`;
 
     const handleCopy = () => {
         navigator.clipboard.writeText(aiPrompt);
