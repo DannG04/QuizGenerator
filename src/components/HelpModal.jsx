@@ -191,7 +191,7 @@ INSTRUCCIÓN: Genera 5-10 preguntas mezclando diferentes tipos de pregunta. Resp
                         <div className="space-y-6">
                             <div>
                                 <h4 className="font-semibold mb-3 text-indigo-500">Tipos de Preguntas Disponibles</h4>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
+                                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
                                     {[
                                         { id: 'multiple-choice', name: 'Opción Múltiple' },
                                         { id: 'true-false', name: 'Verdadero/Falso' },
@@ -205,8 +205,8 @@ INSTRUCCIÓN: Genera 5-10 preguntas mezclando diferentes tipos de pregunta. Resp
                                             onClick={() => setSelectedType(type.id)}
                                             className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                                                 selectedType === type.id
-                                                    ? 'bg-indigo-500 text-white'
-                                                    : (darkMode ? 'bg-white/5 hover:bg-white/10 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700')
+                                                    ? 'bg-indigo-500 text-white shadow-lg'
+                                                    : (darkMode ? 'bg-white/10 hover:bg-white/15 text-gray-200 border border-white/10' : 'bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-200')
                                             }`}
                                         >
                                             {type.name}
@@ -231,7 +231,7 @@ INSTRUCCIÓN: Genera 5-10 preguntas mezclando diferentes tipos de pregunta. Resp
                                 </div>
                                 <pre className={`p-4 rounded-xl text-sm font-mono overflow-x-auto ${
                                     selectedType === 'all-types' ? 'max-h-96' : ''
-                                } ${darkMode ? 'bg-black/30 text-gray-300' : 'bg-gray-100 text-gray-700'
+                                } ${darkMode ? 'bg-black/40 text-gray-100 border border-white/10' : 'bg-gray-50 text-gray-900 border border-gray-200'
                                 }`}>
                                     {examplesByType[selectedType]}
                                 </pre>
@@ -265,7 +265,7 @@ INSTRUCCIÓN: Genera 5-10 preguntas mezclando diferentes tipos de pregunta. Resp
                                     </button>
                                 </div>
                                 <div className={`p-4 rounded-xl text-sm font-mono whitespace-pre-wrap max-h-96 overflow-y-auto ${
-                                    darkMode ? 'bg-indigo-500/10 border border-indigo-500/20 text-indigo-200' : 'bg-indigo-50 border border-indigo-100 text-indigo-800'
+                                    darkMode ? 'bg-indigo-500/10 border border-indigo-500/20 text-indigo-100' : 'bg-indigo-50 border border-indigo-200 text-indigo-900'
                                 }`}>
                                     {aiPrompt}
                                 </div>

@@ -29,8 +29,8 @@ const ThemeCard = ({ id, name, description, active, onClick, onPreview, previewC
                 )}
             </div>
 
-            <h3 className={clsx("font-semibold mb-1", active ? (darkMode ? "text-white" : "text-indigo-700") : (darkMode ? "text-gray-200" : "text-gray-800"))}>{name}</h3>
-            <p className={clsx("text-xs", darkMode ? "text-gray-400" : "text-gray-600")}>{description}</p>
+            <h3 className={clsx("font-semibold mb-1", active ? (darkMode ? "text-white" : "text-indigo-700") : (darkMode ? "text-gray-100" : "text-gray-900"))}>{name}</h3>
+            <p className={clsx("text-xs", darkMode ? "text-gray-300" : "text-gray-600")}>{description}</p>
 
             {/* Glow effect */}
             <div className={clsx(
@@ -57,7 +57,7 @@ const ThemeCard = ({ id, name, description, active, onClick, onPreview, previewC
 const ThemeSelector = ({ currentTheme, setTheme, onPreview, darkMode }) => {
     return (
         <div className="space-y-4">
-            <h2 className={`text-lg font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>Seleccionar Tema</h2>
+            <h2 className={`text-lg font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>Seleccionar Tema</h2>
             <div className="grid grid-cols-1 gap-4">
                 <ThemeCard
                     id="minimalist"

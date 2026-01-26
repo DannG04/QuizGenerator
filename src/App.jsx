@@ -120,23 +120,24 @@ function App() {
               </div>
 
               <div className="mt-auto flex flex-col gap-3">
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={handlePreview}
                     disabled={!isValid || !title}
                     className={`
-                      flex-1 py-4 px-6 rounded-xl font-bold text-lg flex items-center justify-center gap-2
+                      flex-1 py-4 px-6 rounded-xl font-bold text-base sm:text-lg flex items-center justify-center gap-2
                       transition-all duration-300 border
                       ${!isValid || !title
                         ? (darkMode ? 'bg-gray-800 text-gray-500 border-gray-700' : 'bg-gray-200 text-gray-400 border-gray-300') + ' cursor-not-allowed'
-                        : (darkMode ? 'bg-white/5 text-white border-white/10 hover:bg-white/10 hover:border-white/20' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300')
+                        : (darkMode ? 'bg-white/5 text-white border-white/10 hover:bg-white/10 hover:border-white/20' : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50 hover:border-gray-400')
                       }
                     `}
                   >
                     <Eye size={20} />
-                    Vista Previa
+                    <span className="hidden sm:inline">Vista Previa</span>
+                    <span className="sm:hidden">Previa</span>
                   </button>
-                  <div className="flex-[2]">
+                  <div className="flex-1 sm:flex-[2]">
                     <GenerateButton
                       onGenerate={handleGenerate}
                       disabled={!isValid || !title}

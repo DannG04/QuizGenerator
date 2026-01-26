@@ -682,12 +682,16 @@ export const generateQuizHtml = (title, questions, theme) => {
       label.style.display = 'flex';
       label.style.alignItems = 'center';
       label.style.gap = '10px';
+      label.style.wordBreak = 'break-word';
+      label.style.minHeight = '50px';
       
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
+      checkbox.style.minWidth = '20px';
       checkbox.style.width = '20px';
       checkbox.style.height = '20px';
       checkbox.style.cursor = 'pointer';
+      checkbox.style.flexShrink = '0';
       checkbox.onchange = () => {
         if (checkbox.checked) {
           selectedMultiple.add(originalIndex);
@@ -698,13 +702,18 @@ export const generateQuizHtml = (title, questions, theme) => {
         }
       };
       
+      const textSpan = document.createElement('span');
+      textSpan.textContent = text;
+      textSpan.style.flex = '1';
+      
       label.appendChild(checkbox);
-      label.appendChild(document.createTextNode(text));
+      label.appendChild(textSpan);
       els.optionsContainer.appendChild(label);
     });
     
     const submitBtn = document.createElement('button');
     submitBtn.className = 'next-btn';
+    submitBtn.id = 'multiselect-submit-btn';
     submitBtn.style.marginTop = '20px';
     submitBtn.textContent = 'Confirmar Selección';
     submitBtn.onclick = () => handleMultipleSelect(q);
@@ -757,6 +766,7 @@ export const generateQuizHtml = (title, questions, theme) => {
     
     const submitBtn = document.createElement('button');
     submitBtn.className = 'next-btn';
+    submitBtn.id = 'matching-submit-btn';
     submitBtn.style.marginTop = '20px';
     submitBtn.textContent = 'Confirmar Respuestas';
     submitBtn.onclick = () => handleMatching(q);
@@ -792,6 +802,7 @@ export const generateQuizHtml = (title, questions, theme) => {
     
     const submitBtn = document.createElement('button');
     submitBtn.className = 'next-btn';
+    submitBtn.id = 'fillblank-submit-btn';
     submitBtn.style.marginTop = '20px';
     submitBtn.textContent = 'Confirmar Respuesta';
     submitBtn.onclick = () => handleFillBlank(q);
@@ -884,6 +895,12 @@ export const generateQuizHtml = (title, questions, theme) => {
       }
     });
 
+    // Hide the confirm button after answering
+    const submitBtn = document.getElementById('multiselect-submit-btn');
+    if (submitBtn) {
+      submitBtn.style.display = 'none';
+    }
+
     if (isCorrect) {
       score++;
       showFeedback(true, "¡Correcto! " + (q.explanation || ""));
@@ -928,6 +945,12 @@ export const generateQuizHtml = (title, questions, theme) => {
       }
     });
 
+    // Hide the confirm button after answering
+    const submitBtn = document.getElementById('matching-submit-btn');
+    if (submitBtn) {
+      submitBtn.style.display = 'none';
+    }
+
     if (isCorrect) {
       score++;
       showFeedback(true, "¡Correcto! Todas las coincidencias son correctas. " + (q.explanation || ""));
@@ -970,6 +993,12 @@ export const generateQuizHtml = (title, questions, theme) => {
     });
 
     const isCorrect = correctCount === answers.length;
+
+    // Hide the confirm button after answering
+    const submitBtn = document.getElementById('fillblank-submit-btn');
+    if (submitBtn) {
+      submitBtn.style.display = 'none';
+    }
 
     if (isCorrect) {
       score++;

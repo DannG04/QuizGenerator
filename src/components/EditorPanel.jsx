@@ -110,8 +110,8 @@ const EditorPanel = ({ title, setTitle, jsonInput, setJsonInput, setQuestions, s
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Ingresa el título del quiz..."
                         className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all ${darkMode
-                                ? 'bg-black/20 border-white/10 text-white placeholder-gray-500'
-                                : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500'
+                                ? 'bg-black/20 border-white/10 text-white placeholder-gray-400'
+                                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
                             }`}
                     />
                 </div>
@@ -150,8 +150,8 @@ const EditorPanel = ({ title, setTitle, jsonInput, setJsonInput, setQuestions, s
                             onChange={(e) => setJsonInput(e.target.value)}
                             placeholder='[{"question": "...", "options": [...], "correct": 0}]'
                             className={`w-full h-full p-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm resize-none transition-all ${darkMode
-                                    ? 'bg-black/20 border-white/10 text-gray-300 placeholder-gray-500 group-hover:bg-black/30'
-                                    : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-500 group-hover:bg-gray-100'
+                                    ? 'bg-black/20 border-white/10 text-gray-100 placeholder-gray-500 group-hover:bg-black/30'
+                                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 group-hover:bg-gray-50'
                                 }`}
                             spellCheck="false"
                         />
