@@ -68,6 +68,36 @@ export const generateQuizHtml = (title, questions, theme) => {
       gap: 12px;
     }
 
+    .matching-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    select.option-btn {
+      display: block;
+      width: 100%;
+      appearance: auto;
+      -webkit-appearance: auto;
+      min-height: unset;
+      text-align: left;
+    }
+
+    label.option-btn {
+      display: flex;
+      align-items: center;
+    }
+
+    @media (max-width: 500px) {
+      .container { padding: 12px; }
+      .card { padding: 20px 15px; border-radius: 12px; }
+      .question-text { font-size: 1rem; margin-bottom: 18px; }
+      .matching-pair { grid-template-columns: 1fr; }
+      .option-btn { padding: 12px; font-size: 0.95rem; }
+      .fill-blank-input { width: 28% !important; min-width: 70px !important; }
+    }
+
     .option-btn {
       background: transparent;
       border: 2px solid var(--border-color);
@@ -158,10 +188,22 @@ export const generateQuizHtml = (title, questions, theme) => {
         font-weight: 600;
         letter-spacing: 0.5px;
       }
+      select.option-btn {
+        display: block;
+        min-height: unset;
+        text-align: left;
+        justify-content: flex-start;
+      }
+      label.option-btn {
+        min-height: 56px;
+        text-align: left;
+        justify-content: flex-start;
+      }
       .option-btn:hover:not(:disabled) {
         box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.4);
         transform: translateY(-2px);
       }
+      select.option-btn:hover:not(:disabled) { transform: none; }
       h1 { text-shadow: 0 0 10px rgba(var(--accent-rgb), 0.5); }
     ` : ''}
 
@@ -385,6 +427,16 @@ export const generateQuizHtml = (title, questions, theme) => {
       #results-screen {
         animation: slide-in 0.6s ease;
       }
+
+      select.option-btn {
+        display: block;
+        min-height: unset;
+        overflow: hidden;
+      }
+      select.option-btn::before { display: none; }
+      select.option-btn:hover:not(:disabled) { transform: none; }
+      select.option-btn.selected { transform: none; }
+      label.option-btn { overflow: hidden; }
     ` : ''}
 
     ${theme === 'formal-legal' ? `
@@ -730,20 +782,18 @@ export const generateQuizHtml = (title, questions, theme) => {
     
     pairs.forEach((pair, idx) => {
       const pairDiv = document.createElement('div');
-      pairDiv.style.display = 'grid';
-      pairDiv.style.gridTemplateColumns = '1fr 1fr';
-      pairDiv.style.gap = '10px';
-      pairDiv.style.alignItems = 'center';
-      
+      pairDiv.className = 'matching-pair';
+
       const termDiv = document.createElement('div');
       termDiv.className = 'option-btn';
       termDiv.style.cursor = 'default';
       termDiv.style.fontWeight = 'bold';
       termDiv.textContent = pair.term;
-      
+
       const select = document.createElement('select');
       select.className = 'option-btn';
       select.style.cursor = 'pointer';
+      select.style.width = '100%';
       select.innerHTML = '<option value="">-- Selecciona --</option>';
       
       definitions.forEach((def, defIdx) => {
@@ -787,11 +837,12 @@ export const generateQuizHtml = (title, questions, theme) => {
       if (idx < parts.length - 1) {
         const input = document.createElement('input');
         input.type = 'text';
-        input.className = 'option-btn';
+        input.className = 'option-btn fill-blank-input';
         input.style.display = 'inline-block';
-        input.style.width = '200px';
+        input.style.width = 'clamp(80px, 30%, 200px)';
         input.style.margin = '0 5px';
         input.style.textAlign = 'center';
+        input.style.verticalAlign = 'middle';
         input.dataset.index = idx;
         container.appendChild(input);
       }
