@@ -587,11 +587,121 @@ export const generateQuizHtml = (title, questions, theme) => {
       transition: opacity 0.2s;
     }
     .footer a:hover { opacity: 0.8; }
+
+    /* Question transition - 3D Flip */
+    .card-scene {
+      perspective: 1200px;
+    }
+    .card {
+      transform-style: preserve-3d;
+      transition: transform 0.45s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+      will-change: transform;
+    }
+    .card.flip-out {
+      transform: rotateY(90deg) scale(0.95);
+    }
+    .card.flip-in {
+      transform: rotateY(-90deg) scale(0.95);
+      transition: none;
+    }
+    .card.flip-in-active {
+      transform: rotateY(0deg) scale(1);
+      transition: transform 0.45s cubic-bezier(0.645, 0.045, 0.355, 1.000);
+    }
+
+    /* Preloader */
+    #preloader {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    .preloader-col {
+      height: 100%;
+      width: 10%;
+      background-color: var(--bg-color);
+      transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+    #preloader-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      overflow: hidden;
+      font-size: clamp(3rem, 10vw, 8rem);
+      font-weight: 900;
+      color: var(--accent-color);
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    #preloader-text span {
+      display: inline-block;
+      transform: translateY(110%);
+      transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+      opacity: 1;
+      transition-property: transform, opacity;
+    }
   </style>
 </head>
 <body>
 
+<div id="preloader">
+  <div class="preloader-col"></div>
+  <div class="preloader-col"></div>
+  <div class="preloader-col"></div>
+  <div class="preloader-col"></div>
+  <div class="preloader-col"></div>
+  <div class="preloader-col"></div>
+  <div class="preloader-col"></div>
+  <div class="preloader-col"></div>
+  <div class="preloader-col"></div>
+  <div class="preloader-col"></div>
+  <p id="preloader-text">${'Danny Quiz'.split('').map(char => `<span>${char === ' ' ? '&nbsp;' : char}</span>`).join('')}</p>
+</div>
+
+<script>
+  (function() {
+    var letters = document.querySelectorAll('#preloader-text span');
+    var cols = document.querySelectorAll('.preloader-col');
+    var preloader = document.getElementById('preloader');
+
+    // 1. Letras entran
+    letters.forEach(function(el, i) {
+      setTimeout(function() {
+        el.style.transform = 'translateY(0)';
+      }, 80 + i * 45);
+    });
+
+    // 2. Letras salen + columnas caen
+    var exitDelay = 80 + letters.length * 45 + 900;
+    letters.forEach(function(el) {
+      setTimeout(function() {
+        el.style.transform = 'translateY(-110%)';
+        el.style.opacity = '0';
+      }, exitDelay);
+    });
+
+    cols.forEach(function(col, i) {
+      setTimeout(function() {
+        col.style.transform = 'translateY(100%)';
+      }, exitDelay + 80 + i * 60);
+    });
+
+    // 3. Ocultar preloader
+    var totalTime = exitDelay + 80 + cols.length * 60 + 500;
+    setTimeout(function() {
+      preloader.style.opacity = '0';
+      preloader.style.transition = 'opacity 0.3s ease';
+      setTimeout(function() { preloader.style.display = 'none'; }, 300);
+    }, totalTime);
+  })();
+</script>
+
 <div class="container">
+  <div class="card-scene">
   <div id="quiz-screen" class="card">
     <h1 id="quiz-title">${title}</h1>
     <div class="question-count">Pregunta <span id="current-q">1</span> de <span id="total-q">0</span></div>
@@ -606,6 +716,7 @@ export const generateQuizHtml = (title, questions, theme) => {
     </div>
 
     <button id="next-btn" class="next-btn hidden">Siguiente Pregunta</button>
+  </div>
   </div>
 
   <div id="results-screen" class="card hidden" style="text-align: center;">
@@ -1074,12 +1185,40 @@ export const generateQuizHtml = (title, questions, theme) => {
 
   els.nextBtn.onclick = () => {
     if (currentQuestionIndex < questions.length - 1) {
-      currentQuestionIndex++;
-      loadQuestion();
+      transitionQuestion(() => {
+        currentQuestionIndex++;
+        loadQuestion();
+      });
     } else {
-      showResults();
+      transitionQuestion(() => showResults());
     }
   };
+
+  function transitionQuestion(callback) {
+    var card = document.getElementById('quiz-screen');
+
+    // Fase 1: flip hacia afuera (0deg → 90deg)
+    card.classList.add('flip-out');
+
+    setTimeout(function() {
+      // En el punto medio (90deg) el card es invisible — actualizamos contenido
+      callback();
+
+      // Fase 2: posicionar desde -90deg sin transición
+      card.classList.remove('flip-out');
+      card.classList.add('flip-in');
+
+      void card.offsetWidth; // forzar reflow
+
+      // Fase 3: animar entrada (-90deg → 0deg)
+      card.classList.remove('flip-in');
+      card.classList.add('flip-in-active');
+
+      setTimeout(function() {
+        card.classList.remove('flip-in-active');
+      }, 450);
+    }, 450);
+  }
 
   function showResults() {
     els.quizScreen.classList.add('hidden');

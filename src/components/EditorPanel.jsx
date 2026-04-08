@@ -11,6 +11,32 @@ const EditorPanel = ({ title, setTitle, jsonInput, setJsonInput, setQuestions, s
         validateJson(jsonInput);
     }, [jsonInput]);
 
+    const normalizeQuestion = (q) => {
+        const type = q.type || 'multiple-choice';
+        const n = { ...q, type };
+
+        switch (type) {
+            case 'multiple-choice':
+                if (typeof q.correct === 'string') {
+                    n.correct = q.options.indexOf(q.correct);
+                }
+                break;
+            case 'multiple-select':
+                if (Array.isArray(q.correct) && q.correct.length > 0 && typeof q.correct[0] === 'string') {
+                    n.correct = q.correct.map(c => q.options.indexOf(c));
+                }
+                break;
+            case 'fill-blank':
+                if (!n.answers && Array.isArray(q.correct)) {
+                    n.answers = q.correct;
+                    delete n.correct;
+                }
+                break;
+        }
+
+        return n;
+    };
+
     const validateJson = (input) => {
         if (!input.trim()) {
             setValidationStatus({ valid: false, message: 'Esperando entrada...' });
@@ -20,81 +46,84 @@ const EditorPanel = ({ title, setTitle, jsonInput, setJsonInput, setQuestions, s
 
         try {
             const parsed = JSON.parse(input);
-            if (!Array.isArray(parsed)) throw new Error('La raíz debe ser un array');
+            if (!Array.isArray(parsed)) throw new Error('La raíz debe ser un array [ ]');
+            if (parsed.length === 0) throw new Error('El array no puede estar vacío');
 
-            const validQuestions = parsed.every((q, index) => {
-                // Validar que tenga pregunta
+            const normalized = parsed.map((q, index) => {
                 if (!q.question || typeof q.question !== 'string') {
                     throw new Error(`Pregunta ${index + 1}: falta el campo "question"`);
                 }
 
                 const type = q.type || 'multiple-choice';
 
-                // Validar según el tipo
-                switch(type) {
-                    case 'multiple-choice':
-                        if (!Array.isArray(q.options) || q.options.length < 2) {
-                            throw new Error(`Pregunta ${index + 1}: "options" debe ser un array con al menos 2 elementos`);
-                        }
-                        if (typeof q.correct !== 'number' || q.correct < 0 || q.correct >= q.options.length) {
-                            throw new Error(`Pregunta ${index + 1}: "correct" debe ser un índice válido`);
+                switch (type) {
+                    case 'multiple-choice': {
+                        if (!Array.isArray(q.options) || q.options.length < 2)
+                            throw new Error(`Pregunta ${index + 1}: "options" debe tener al menos 2 opciones`);
+                        if (typeof q.correct === 'string') {
+                            if (!q.options.includes(q.correct))
+                                throw new Error(`Pregunta ${index + 1}: "${q.correct}" no existe en "options"`);
+                        } else if (typeof q.correct === 'number') {
+                            if (q.correct < 0 || q.correct >= q.options.length)
+                                throw new Error(`Pregunta ${index + 1}: índice "correct" fuera de rango`);
+                        } else {
+                            throw new Error(`Pregunta ${index + 1}: "correct" debe ser el texto de la respuesta correcta`);
                         }
                         break;
-
+                    }
                     case 'true-false':
-                        if (typeof q.correct !== 'boolean') {
+                        if (typeof q.correct !== 'boolean')
                             throw new Error(`Pregunta ${index + 1}: "correct" debe ser true o false`);
-                        }
                         break;
 
-                    case 'multiple-select':
-                        if (!Array.isArray(q.options) || q.options.length < 2) {
-                            throw new Error(`Pregunta ${index + 1}: "options" debe ser un array con al menos 2 elementos`);
-                        }
-                        if (!Array.isArray(q.correct) || q.correct.length === 0) {
-                            throw new Error(`Pregunta ${index + 1}: "correct" debe ser un array de índices`);
-                        }
-                        if (!q.correct.every(idx => typeof idx === 'number' && idx >= 0 && idx < q.options.length)) {
-                            throw new Error(`Pregunta ${index + 1}: todos los índices en "correct" deben ser válidos`);
+                    case 'multiple-select': {
+                        if (!Array.isArray(q.options) || q.options.length < 2)
+                            throw new Error(`Pregunta ${index + 1}: "options" debe tener al menos 2 opciones`);
+                        if (!Array.isArray(q.correct) || q.correct.length === 0)
+                            throw new Error(`Pregunta ${index + 1}: "correct" debe ser un array con las respuestas correctas`);
+                        if (typeof q.correct[0] === 'string') {
+                            q.correct.forEach(c => {
+                                if (!q.options.includes(c))
+                                    throw new Error(`Pregunta ${index + 1}: "${c}" no existe en "options"`);
+                            });
+                        } else {
+                            q.correct.forEach(idx => {
+                                if (typeof idx !== 'number' || idx < 0 || idx >= q.options.length)
+                                    throw new Error(`Pregunta ${index + 1}: índice ${idx} en "correct" fuera de rango`);
+                            });
                         }
                         break;
-
+                    }
                     case 'matching':
-                        if (!Array.isArray(q.pairs) || q.pairs.length < 2) {
-                            throw new Error(`Pregunta ${index + 1}: "pairs" debe ser un array con al menos 2 elementos`);
-                        }
-                        if (!q.pairs.every(p => p.term && p.definition)) {
-                            throw new Error(`Pregunta ${index + 1}: cada par debe tener "term" y "definition"`);
-                        }
+                        if (!Array.isArray(q.pairs) || q.pairs.length < 2)
+                            throw new Error(`Pregunta ${index + 1}: "pairs" debe tener al menos 2 pares`);
+                        if (!q.pairs.every(p => p.term && p.definition))
+                            throw new Error(`Pregunta ${index + 1}: cada par necesita "term" y "definition"`);
                         break;
 
-                    case 'fill-blank':
-                        if (!q.question.includes('___')) {
-                            throw new Error(`Pregunta ${index + 1}: debe contener al menos un espacio "___"`);
-                        }
-                        if (!Array.isArray(q.answers) || q.answers.length === 0) {
-                            throw new Error(`Pregunta ${index + 1}: "answers" debe ser un array con las respuestas`);
-                        }
-                        const blanksCount = (q.question.match(/___/g) || []).length;
-                        if (q.answers.length !== blanksCount) {
-                            throw new Error(`Pregunta ${index + 1}: número de respuestas (${q.answers.length}) no coincide con espacios (${blanksCount})`);
-                        }
+                    case 'fill-blank': {
+                        if (!q.question.includes('___'))
+                            throw new Error(`Pregunta ${index + 1}: usa ___ para marcar los espacios en blanco`);
+                        const blanks = (q.question.match(/___/g) || []).length;
+                        const ans = q.answers || q.correct;
+                        if (!Array.isArray(ans) || ans.length === 0)
+                            throw new Error(`Pregunta ${index + 1}: "correct" debe ser un array con las respuestas`);
+                        if (ans.length !== blanks)
+                            throw new Error(`Pregunta ${index + 1}: tienes ${blanks} espacio(s) pero ${ans.length} respuesta(s)`);
                         break;
-
+                    }
                     default:
-                        throw new Error(`Pregunta ${index + 1}: tipo "${type}" no es válido`);
+                        throw new Error(`Pregunta ${index + 1}: tipo "${type}" no reconocido`);
                 }
 
-                return true;
+                return normalizeQuestion(q);
             });
 
-            if (!validQuestions) throw new Error('Estructura de pregunta inválida');
-
-            setValidationStatus({ valid: true, message: `✓ ${parsed.length} pregunta${parsed.length !== 1 ? 's' : ''} válida${parsed.length !== 1 ? 's' : ''}` });
-            setQuestions(parsed);
+            setValidationStatus({ valid: true, message: `${normalized.length} pregunta${normalized.length !== 1 ? 's' : ''} lista${normalized.length !== 1 ? 's' : ''}` });
+            setQuestions(normalized);
             setIsValid(true);
         } catch (e) {
-            setValidationStatus({ valid: false, message: e.message || 'Formato Inválido' });
+            setValidationStatus({ valid: false, message: e.message || 'JSON inválido' });
             setIsValid(false);
         }
     };

@@ -13,45 +13,45 @@ const HelpModal = ({ isOpen, onClose, darkMode }) => {
     "type": "multiple-choice",
     "question": "¿Cuál es la capital de Francia?",
     "options": ["Londres", "Berlín", "París", "Madrid"],
-    "correct": 2,
-    "explanation": "París es la capital de Francia."
+    "correct": "París",
+    "explanation": "París es la capital y ciudad más grande de Francia."
   }
 ]`,
         'true-false': `[
   {
     "type": "true-false",
-    "question": "La Tierra es plana",
+    "question": "JavaScript y Java son el mismo lenguaje de programación.",
     "correct": false,
-    "explanation": "La Tierra es esférica, no plana."
+    "explanation": "Son lenguajes completamente distintos. Java es compilado y tipado; JavaScript es interpretado y dinámico."
   }
 ]`,
         'multiple-select': `[
   {
     "type": "multiple-select",
-    "question": "¿Cuáles son lenguajes de programación?",
+    "question": "¿Cuáles de los siguientes son lenguajes de programación?",
     "options": ["Python", "HTML", "JavaScript", "CSS"],
-    "correct": [0, 2],
-    "explanation": "Python y JavaScript son lenguajes. HTML y CSS son de marcado."
+    "correct": ["Python", "JavaScript"],
+    "explanation": "Python y JavaScript son lenguajes de programación. HTML y CSS son lenguajes de marcado/estilos."
   }
 ]`,
         'matching': `[
   {
     "type": "matching",
-    "question": "Relaciona cada país con su capital:",
+    "question": "Relaciona cada tecnología web con su función:",
     "pairs": [
-      {"term": "España", "definition": "Madrid"},
-      {"term": "Francia", "definition": "París"},
-      {"term": "Italia", "definition": "Roma"}
+      {"term": "HTML", "definition": "Estructura del contenido"},
+      {"term": "CSS", "definition": "Estilos y diseño visual"},
+      {"term": "JavaScript", "definition": "Interactividad y lógica"}
     ],
-    "explanation": "Cada país tiene su propia capital."
+    "explanation": "Cada tecnología cumple un rol distinto en el desarrollo web."
   }
 ]`,
         'fill-blank': `[
   {
     "type": "fill-blank",
-    "question": "La capital de ___ es París, y la de España es ___.",
-    "answers": ["Francia", "Madrid"],
-    "explanation": "Francia-París y España-Madrid son las capitales."
+    "question": "El lenguaje ___ se usa para estilos, mientras que ___ añade interactividad.",
+    "correct": ["CSS", "JavaScript"],
+    "explanation": "CSS controla la apariencia visual; JavaScript añade comportamiento dinámico."
   }
 ]`,
         'all-types': `[
@@ -59,21 +59,21 @@ const HelpModal = ({ isOpen, onClose, darkMode }) => {
     "type": "multiple-choice",
     "question": "¿Cuál es la capital de Francia?",
     "options": ["Londres", "Berlín", "París", "Madrid"],
-    "correct": 2,
-    "explanation": "París es la capital de Francia."
+    "correct": "París",
+    "explanation": "París es la capital de Francia desde el siglo X."
   },
   {
     "type": "true-false",
-    "question": "JavaScript y Java son el mismo lenguaje",
+    "question": "JavaScript y Java son el mismo lenguaje.",
     "correct": false,
-    "explanation": "JavaScript y Java son lenguajes completamente diferentes."
+    "explanation": "Son lenguajes completamente distintos en sintaxis, uso y paradigma."
   },
   {
     "type": "multiple-select",
     "question": "¿Cuáles son navegadores web?",
     "options": ["Chrome", "Python", "Firefox", "Safari"],
-    "correct": [0, 2, 3],
-    "explanation": "Chrome, Firefox y Safari son navegadores. Python es un lenguaje."
+    "correct": ["Chrome", "Firefox", "Safari"],
+    "explanation": "Chrome, Firefox y Safari son navegadores. Python es un lenguaje de programación."
   },
   {
     "type": "matching",
@@ -83,72 +83,80 @@ const HelpModal = ({ isOpen, onClose, darkMode }) => {
       {"term": "CSS", "definition": "Estilos y diseño"},
       {"term": "JavaScript", "definition": "Interactividad y lógica"}
     ],
-    "explanation": "Cada tecnología web tiene un propósito específico."
+    "explanation": "Las tres tecnologías son la base del desarrollo web frontend."
   },
   {
     "type": "fill-blank",
-    "question": "El lenguaje ___ se usa para estilos, mientras que ___ añade interactividad.",
-    "answers": ["CSS", "JavaScript"],
-    "explanation": "CSS para estilos, JavaScript para interactividad."
+    "question": "La capital de ___ es París, y la de Italia es ___.",
+    "correct": ["Francia", "Roma"],
+    "explanation": "Francia tiene a París y Italia tiene a Roma como capitales."
   }
 ]`
     };
 
-    const aiPrompt = `EJEMPLO DE USO:
-"Basándote en las fuentes adjuntas, genérame preguntas en formato JSON de diferentes tipos sobre [TU_TEMA]"
+    const aiPrompt = `Genera un array JSON de preguntas para un quiz sobre [ESCRIBE TU TEMA AQUÍ].
 
-Genera un array de objetos JSON para un quiz sobre [TU_TEMA].
+REGLAS IMPORTANTES:
+- Responde ÚNICAMENTE con el JSON válido, sin explicaciones ni texto extra.
+- Mezcla los 5 tipos de preguntas disponibles.
+- Genera entre 8 y 12 preguntas.
+- En "correct" escribe el texto exacto de la respuesta (no el índice numérico).
+- Todas las "explanation" deben ser claras, breves y educativas.
 
-TIPOS DE PREGUNTAS DISPONIBLES:
+═══════════════════════════════════════
+TIPOS DE PREGUNTAS
+═══════════════════════════════════════
 
-1. OPCIÓN MÚLTIPLE (multiple-choice):
+1. OPCIÓN MÚLTIPLE — una respuesta correcta
 {
   "type": "multiple-choice",
-  "question": "Texto de la pregunta",
-  "options": ["Opción A", "Opción B", "Opción C", "Opción D"],
-  "correct": 2,
-  "explanation": "Explicación"
+  "question": "¿Cuál es la capital de Francia?",
+  "options": ["Londres", "Berlín", "París", "Madrid"],
+  "correct": "París",
+  "explanation": "París es la capital de Francia desde el siglo X."
 }
 
-2. VERDADERO/FALSO (true-false):
+2. VERDADERO / FALSO
 {
   "type": "true-false",
-  "question": "Afirmación a evaluar",
-  "correct": true,
-  "explanation": "Explicación"
+  "question": "JavaScript y Java son el mismo lenguaje.",
+  "correct": false,
+  "explanation": "Son lenguajes distintos: Java es compilado, JavaScript es interpretado."
 }
 
-3. SELECCIÓN MÚLTIPLE (multiple-select):
+3. SELECCIÓN MÚLTIPLE — varias respuestas correctas
 {
   "type": "multiple-select",
-  "question": "Pregunta con varias respuestas correctas",
-  "options": ["A", "B", "C", "D"],
-  "correct": [0, 2],
-  "explanation": "Explicación"
+  "question": "¿Cuáles son navegadores web?",
+  "options": ["Chrome", "Python", "Firefox", "Safari"],
+  "correct": ["Chrome", "Firefox", "Safari"],
+  "explanation": "Chrome, Firefox y Safari son navegadores. Python es un lenguaje."
 }
 
-4. RELACIONAR (matching):
+4. RELACIONAR — emparejar términos con definiciones
 {
   "type": "matching",
-  "question": "Relaciona los términos:",
+  "question": "Relaciona cada tecnología con su función:",
   "pairs": [
-    {"term": "Término 1", "definition": "Definición 1"},
-    {"term": "Término 2", "definition": "Definición 2"}
+    {"term": "HTML", "definition": "Estructura del contenido"},
+    {"term": "CSS", "definition": "Estilos y diseño"},
+    {"term": "JavaScript", "definition": "Interactividad"}
   ],
-  "explanation": "Explicación"
+  "explanation": "Las tres son la base del desarrollo web frontend."
 }
 
-5. COMPLETAR ESPACIOS (fill-blank):
+5. COMPLETAR ESPACIOS — usa ___ para cada espacio en blanco
 {
   "type": "fill-blank",
-  "question": "El ___ es el rey de la selva y vive en ___.",
-  "answers": ["león", "África"],
-  "explanation": "Explicación"
+  "question": "La capital de ___ es París, y la de Italia es ___.",
+  "correct": ["Francia", "Roma"],
+  "explanation": "Francia → París, Italia → Roma."
 }
 
-IMPORTANTE: Las respuestas se mostrarán en orden ALEATORIO cada vez.
-
-INSTRUCCIÓN: Genera 5-10 preguntas mezclando diferentes tipos de pregunta. Responde SOLO con el JSON válido, sin texto adicional.`;
+═══════════════════════════════════════
+CONSEJO: Si tienes un documento, imagen o apuntes, adjúntalos y pide:
+"Basándote en este material, genera el JSON del quiz."
+═══════════════════════════════════════`;
 
     const handleCopy = () => {
         navigator.clipboard.writeText(aiPrompt);
@@ -238,20 +246,22 @@ INSTRUCCIÓN: Genera 5-10 preguntas mezclando diferentes tipos de pregunta. Resp
                             </div>
 
                             <div className={`p-4 rounded-xl ${darkMode ? 'bg-yellow-500/10 border border-yellow-500/20' : 'bg-yellow-50 border border-yellow-200'}`}>
-                                <p className={`text-sm font-semibold mb-1 ${darkMode ? 'text-yellow-300' : 'text-yellow-800'}`}>
-                                    ⚡ Características importantes:
+                                <p className={`text-sm font-semibold mb-2 ${darkMode ? 'text-yellow-300' : 'text-yellow-800'}`}>
+                                    Cosas útiles que saber:
                                 </p>
-                                <ul className={`text-xs space-y-1 ${darkMode ? 'text-yellow-200' : 'text-yellow-700'}`}>
-                                    <li>• Las respuestas se mezclan aleatoriamente en cada intento</li>
-                                    <li>• Puedes combinar diferentes tipos de preguntas en un mismo quiz</li>
-                                    <li>• El campo "type" es opcional (por defecto: "multiple-choice")</li>
-                                    <li>• Usa "___" para espacios en blanco en fill-blank</li>
+                                <ul className={`text-xs space-y-1.5 ${darkMode ? 'text-yellow-200' : 'text-yellow-700'}`}>
+                                    <li>• En <code className="font-mono bg-black/20 px-1 rounded">correct</code> escribe el texto exacto de la opción, no el número</li>
+                                    <li>• Para <strong>multiple-select</strong>, <code className="font-mono bg-black/20 px-1 rounded">correct</code> es un array con varios textos</li>
+                                    <li>• Para <strong>fill-blank</strong>, <code className="font-mono bg-black/20 px-1 rounded">correct</code> es un array — un valor por cada ___</li>
+                                    <li>• Las opciones se mezclan aleatoriamente en cada intento</li>
+                                    <li>• El campo <code className="font-mono bg-black/20 px-1 rounded">type</code> es opcional (por defecto: multiple-choice)</li>
+                                    <li>• El campo <code className="font-mono bg-black/20 px-1 rounded">explanation</code> es opcional pero recomendado</li>
                                 </ul>
                             </div>
 
                             <div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <h4 className="font-semibold text-indigo-500">Prompt Completo para IA</h4>
+                                    <h4 className="font-semibold text-indigo-500">Prompt listo para copiar y pegar en una IA</h4>
                                     <button
                                         onClick={handleCopy}
                                         className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
