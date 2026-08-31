@@ -1,6 +1,7 @@
 
 export const generateQuizHtml = (title, questions, theme) => {
   const themeStyles = getThemeStyles(theme);
+  const arrowColor = (theme === 'cyberpunk' || theme === 'neon-blue') ? '%23cbd5e1' : '%23475569';
 
   const htmlContent = `
 <!DOCTYPE html>
@@ -108,8 +109,13 @@ export const generateQuizHtml = (title, questions, theme) => {
       padding: 15px;
       border-radius: 8px;
       background-color: rgba(0,0,0,0.05);
+      animation: feedback-enter 0.3s ease;
     }
-    
+    @keyframes feedback-enter {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .feedback.visible { display: block; }
     .feedback.success { border-left: 4px solid #22c55e; }
     .feedback.error { border-left: 4px solid #ef4444; }
@@ -131,6 +137,100 @@ export const generateQuizHtml = (title, questions, theme) => {
 
     .next-btn:hover, .restart-btn:hover { opacity: 0.9; }
     .hidden { display: none; }
+
+    /* Progress bar */
+    .progress-container {
+      width: 100%;
+      height: 5px;
+      background: var(--border-color);
+      border-radius: 3px;
+      margin-bottom: 22px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-color);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    /* Select custom styling */
+    select.option-btn {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-color: var(--card-bg);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='${arrowColor}' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 14px;
+      padding-right: 38px;
+      color: var(--text-color);
+    }
+    select.option-btn option {
+      background-color: var(--card-bg);
+      color: var(--text-color);
+    }
+
+    /* Checkbox accent */
+    input[type="checkbox"] {
+      accent-color: var(--accent-color);
+    }
+
+    /* Matching layout */
+    .matching-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+    .matching-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    /* Warning message */
+    .warning-msg {
+      font-size: 0.85rem;
+      padding: 10px 14px;
+      background: rgba(245, 158, 11, 0.12);
+      border-radius: 8px;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #d97706;
+      display: none;
+      margin-top: 10px;
+      text-align: center;
+    }
+    .warning-msg.visible { display: block; }
+
+    /* Fill blank input */
+    input.fill-blank-input {
+      display: inline-block !important;
+      width: 180px;
+      max-width: 45vw;
+      margin: 4px 6px;
+      text-align: center;
+      vertical-align: middle;
+      min-height: 40px;
+      line-height: 38px;
+    }
+
+    /* Touch active states */
+    .option-btn:active:not(:disabled) {
+      transform: scale(0.96) !important;
+    }
+    .next-btn:active, .restart-btn:active {
+      opacity: 0.82 !important;
+      transform: scale(0.97) !important;
+    }
+
+    /* Question transition */
+    #question-container {
+      transition: opacity 0.2s ease;
+    }
 
     /* Theme Specific Overrides */
     ${theme === 'cyberpunk' ? `
@@ -535,6 +635,27 @@ export const generateQuizHtml = (title, questions, theme) => {
       transition: opacity 0.2s;
     }
     .footer a:hover { opacity: 0.8; }
+
+    /* ===== RESPONSIVE MOBILE ===== */
+    @media (max-width: 640px) {
+      .container { padding: 10px; }
+      .card { padding: 22px 18px; border-radius: 14px; }
+      h1 { font-size: 1.35rem; margin-bottom: 14px; }
+      .question-text { font-size: 1.05rem; margin-bottom: 18px; }
+      .option-btn { padding: 13px 14px; font-size: 0.94rem; min-height: 44px; }
+      select.option-btn { min-height: 44px; }
+      .matching-pair { grid-template-columns: 1fr; gap: 6px; }
+      .next-btn, .restart-btn { padding: 14px; font-size: 0.95rem; min-height: 48px; }
+      input.fill-blank-input { width: calc(100% - 16px) !important; max-width: 100% !important; }
+      .feedback { padding: 12px 14px; }
+    }
+    @media (max-width: 380px) {
+      .container { padding: 6px; }
+      .card { padding: 18px 14px; }
+      .question-text { font-size: 1rem; }
+      .option-btn { font-size: 0.9rem; padding: 11px 12px; min-height: 40px; }
+      h1 { font-size: 1.2rem; }
+    }
   </style>
 </head>
 <body>
@@ -543,7 +664,10 @@ export const generateQuizHtml = (title, questions, theme) => {
   <div id="quiz-screen" class="card">
     <h1 id="quiz-title">${title}</h1>
     <div class="question-count">Pregunta <span id="current-q">1</span> de <span id="total-q">0</span></div>
-    
+    <div class="progress-container">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
     <div id="question-container">
       <div class="question-text" id="question-text">Cargando...</div>
       <div class="options-grid" id="options-container"></div>
@@ -558,8 +682,10 @@ export const generateQuizHtml = (title, questions, theme) => {
 
   <div id="results-screen" class="card hidden" style="text-align: center;">
     <h1>¡Quiz Completado!</h1>
-    <div style="font-size: 4rem; margin: 20px 0; color: var(--accent-color);" id="final-score">0%</div>
-    <p style="color: var(--secondary-text); margin-bottom: 30px;">Tu puntuación: <span id="score-fraction">0/0</span></p>
+    <div id="results-emoji" style="font-size: 3rem; margin: 8px 0 4px;">🎯</div>
+    <div style="font-size: 3.8rem; margin: 8px 0; color: var(--accent-color);" id="final-score">0%</div>
+    <p id="results-message" style="color: var(--secondary-text); font-size: 1.05rem; margin-bottom: 8px; font-weight: 500;"></p>
+    <p style="color: var(--secondary-text); margin-bottom: 28px;">Tu puntuación: <span id="score-fraction">0/0</span></p>
     <button class="restart-btn" onclick="location.reload()">Jugar de Nuevo</button>
   </div>
 
@@ -591,7 +717,11 @@ export const generateQuizHtml = (title, questions, theme) => {
     feedbackText: document.getElementById('feedback-text'),
     nextBtn: document.getElementById('next-btn'),
     finalScore: document.getElementById('final-score'),
-    scoreFraction: document.getElementById('score-fraction')
+    scoreFraction: document.getElementById('score-fraction'),
+    questionContainer: document.getElementById('question-container'),
+    progressBar: document.getElementById('progress-bar'),
+    resultsEmoji: document.getElementById('results-emoji'),
+    resultsMessage: document.getElementById('results-message')
   };
 
   // Función para mezclar arrays
@@ -615,7 +745,12 @@ export const generateQuizHtml = (title, questions, theme) => {
     selectedMultiple = new Set();
     const q = questions[currentQuestionIndex];
     const type = q.type || 'multiple-choice';
-    
+
+    // Actualizar barra de progreso
+    els.progressBar.style.width = (currentQuestionIndex / questions.length * 100) + '%';
+    // Reset grid layout para cada tipo de pregunta
+    els.optionsContainer.style.gridTemplateColumns = '';
+
     els.currentQ.textContent = currentQuestionIndex + 1;
     els.questionText.textContent = q.question;
     els.optionsContainer.innerHTML = '';
@@ -672,24 +807,29 @@ export const generateQuizHtml = (title, questions, theme) => {
   }
 
   function renderMultipleSelect(q) {
+    // Forzar columna única independiente del tema
+    els.optionsContainer.style.gridTemplateColumns = '1fr';
+
     const optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, originalIndex: idx }));
     const shuffledOptions = shuffleArray(optionsWithIndex);
-    
+
     shuffledOptions.forEach(({ text, originalIndex }) => {
       const label = document.createElement('label');
       label.className = 'option-btn';
+      label.dataset.originalIndex = originalIndex;
       label.style.cursor = 'pointer';
       label.style.display = 'flex';
       label.style.alignItems = 'center';
-      label.style.gap = '10px';
-      label.style.wordBreak = 'break-word';
-      label.style.minHeight = '50px';
-      
+      label.style.justifyContent = 'flex-start';
+      label.style.textAlign = 'left';
+      label.style.gap = '12px';
+      label.style.overflowWrap = 'break-word';
+
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
-      checkbox.style.minWidth = '20px';
-      checkbox.style.width = '20px';
-      checkbox.style.height = '20px';
+      checkbox.style.minWidth = '22px';
+      checkbox.style.width = '22px';
+      checkbox.style.height = '22px';
       checkbox.style.cursor = 'pointer';
       checkbox.style.flexShrink = '0';
       checkbox.onchange = () => {
@@ -700,74 +840,97 @@ export const generateQuizHtml = (title, questions, theme) => {
           selectedMultiple.delete(originalIndex);
           label.classList.remove('selected');
         }
+        // Ocultar advertencia al interactuar
+        const warning = document.getElementById('multiselect-warning');
+        if (warning) warning.classList.remove('visible');
       };
-      
+
       const textSpan = document.createElement('span');
       textSpan.textContent = text;
       textSpan.style.flex = '1';
-      
+      textSpan.style.lineHeight = '1.4';
+
       label.appendChild(checkbox);
       label.appendChild(textSpan);
       els.optionsContainer.appendChild(label);
     });
-    
+
+    // Advertencia de validación
+    const warning = document.createElement('div');
+    warning.className = 'warning-msg';
+    warning.id = 'multiselect-warning';
+    warning.textContent = 'Selecciona al menos una opción antes de confirmar.';
+    els.optionsContainer.appendChild(warning);
+
     const submitBtn = document.createElement('button');
     submitBtn.className = 'next-btn';
     submitBtn.id = 'multiselect-submit-btn';
-    submitBtn.style.marginTop = '20px';
     submitBtn.textContent = 'Confirmar Selección';
     submitBtn.onclick = () => handleMultipleSelect(q);
     els.optionsContainer.appendChild(submitBtn);
   }
 
   function renderMatching(q) {
+    // Forzar columna única independiente del tema
+    els.optionsContainer.style.gridTemplateColumns = '1fr';
+
     const container = document.createElement('div');
-    container.style.display = 'grid';
-    container.style.gap = '15px';
-    
+    container.className = 'matching-container';
+
     const pairs = q.pairs || [];
     const definitions = shuffleArray(pairs.map(p => p.definition));
-    
+
     pairs.forEach((pair, idx) => {
       const pairDiv = document.createElement('div');
-      pairDiv.style.display = 'grid';
-      pairDiv.style.gridTemplateColumns = '1fr 1fr';
-      pairDiv.style.gap = '10px';
-      pairDiv.style.alignItems = 'center';
-      
+      pairDiv.className = 'matching-pair';
+      pairDiv.dataset.idx = idx;
+
       const termDiv = document.createElement('div');
       termDiv.className = 'option-btn';
       termDiv.style.cursor = 'default';
       termDiv.style.fontWeight = 'bold';
+      termDiv.style.display = 'flex';
+      termDiv.style.alignItems = 'center';
+      termDiv.style.justifyContent = 'flex-start';
+      termDiv.style.textAlign = 'left';
       termDiv.textContent = pair.term;
-      
+
       const select = document.createElement('select');
       select.className = 'option-btn';
       select.style.cursor = 'pointer';
       select.innerHTML = '<option value="">-- Selecciona --</option>';
-      
-      definitions.forEach((def, defIdx) => {
+
+      definitions.forEach((def) => {
         const option = document.createElement('option');
         option.value = def;
         option.textContent = def;
         select.appendChild(option);
       });
-      
+
       select.onchange = () => {
         selectedMatches[idx] = select.value;
+        // Ocultar advertencia al interactuar
+        const warning = document.getElementById('matching-warning');
+        if (warning) warning.classList.remove('visible');
       };
-      
+
       pairDiv.appendChild(termDiv);
       pairDiv.appendChild(select);
       container.appendChild(pairDiv);
     });
-    
+
     els.optionsContainer.appendChild(container);
-    
+
+    // Advertencia de validación
+    const warning = document.createElement('div');
+    warning.className = 'warning-msg';
+    warning.id = 'matching-warning';
+    warning.textContent = 'Selecciona una opción para cada elemento antes de confirmar.';
+    els.optionsContainer.appendChild(warning);
+
     const submitBtn = document.createElement('button');
     submitBtn.className = 'next-btn';
     submitBtn.id = 'matching-submit-btn';
-    submitBtn.style.marginTop = '20px';
     submitBtn.textContent = 'Confirmar Respuestas';
     submitBtn.onclick = () => handleMatching(q);
     els.optionsContainer.appendChild(submitBtn);
@@ -777,33 +940,31 @@ export const generateQuizHtml = (title, questions, theme) => {
     const parts = q.question.split('___');
     const container = document.createElement('div');
     container.style.fontSize = '1.1rem';
-    container.style.lineHeight = '2';
-    
+    container.style.lineHeight = '2.2';
+
     parts.forEach((part, idx) => {
       const span = document.createElement('span');
       span.textContent = part;
       container.appendChild(span);
-      
+
       if (idx < parts.length - 1) {
         const input = document.createElement('input');
         input.type = 'text';
-        input.className = 'option-btn';
-        input.style.display = 'inline-block';
-        input.style.width = '200px';
-        input.style.margin = '0 5px';
-        input.style.textAlign = 'center';
+        input.className = 'option-btn fill-blank-input';
         input.dataset.index = idx;
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') handleFillBlank(q);
+        });
         container.appendChild(input);
       }
     });
-    
+
     els.questionText.innerHTML = '';
     els.questionText.appendChild(container);
-    
+
     const submitBtn = document.createElement('button');
     submitBtn.className = 'next-btn';
     submitBtn.id = 'fillblank-submit-btn';
-    submitBtn.style.marginTop = '20px';
     submitBtn.textContent = 'Confirmar Respuesta';
     submitBtn.onclick = () => handleFillBlank(q);
     els.optionsContainer.appendChild(submitBtn);
@@ -873,33 +1034,41 @@ export const generateQuizHtml = (title, questions, theme) => {
 
   function handleMultipleSelect(q) {
     if (isAnswered) return;
+
+    // Validar que se seleccione al menos una opción
+    if (selectedMultiple.size === 0) {
+      const warning = document.getElementById('multiselect-warning');
+      if (warning) warning.classList.add('visible');
+      return;
+    }
+
     isAnswered = true;
 
     const correctSet = new Set(q.correct);
-    const isCorrect = correctSet.size === selectedMultiple.size && 
+    const isCorrect = correctSet.size === selectedMultiple.size &&
                       [...correctSet].every(x => selectedMultiple.has(x));
 
     const labels = els.optionsContainer.querySelectorAll('label.option-btn');
-    
-    labels.forEach((label, idx) => {
+
+    labels.forEach((label) => {
       const checkbox = label.querySelector('input[type="checkbox"]');
       checkbox.disabled = true;
-      
-      const optionText = label.textContent.trim();
-      const originalIndex = q.options.findIndex(opt => optionText.includes(opt));
-      
+      const originalIndex = parseInt(label.dataset.originalIndex);
+
       if (correctSet.has(originalIndex)) {
         label.classList.add('correct');
+        label.classList.remove('selected');
       } else if (selectedMultiple.has(originalIndex)) {
         label.classList.add('incorrect');
+        label.classList.remove('selected');
       }
     });
 
-    // Hide the confirm button after answering
+    // Ocultar botón de confirmar y advertencia
     const submitBtn = document.getElementById('multiselect-submit-btn');
-    if (submitBtn) {
-      submitBtn.style.display = 'none';
-    }
+    if (submitBtn) submitBtn.style.display = 'none';
+    const warning = document.getElementById('multiselect-warning');
+    if (warning) warning.style.display = 'none';
 
     if (isCorrect) {
       score++;
@@ -910,7 +1079,7 @@ export const generateQuizHtml = (title, questions, theme) => {
     }
 
     els.nextBtn.classList.remove('hidden');
-    
+
     if (currentQuestionIndex === questions.length - 1) {
       els.nextBtn.textContent = "Ver Resultados";
     }
@@ -918,9 +1087,21 @@ export const generateQuizHtml = (title, questions, theme) => {
 
   function handleMatching(q) {
     if (isAnswered) return;
-    isAnswered = true;
 
     const pairs = q.pairs || [];
+
+    // Validar que todos los selects tengan valor
+    const selects = els.optionsContainer.querySelectorAll('select');
+    let allSelected = true;
+    selects.forEach((sel) => { if (!sel.value) allSelected = false; });
+
+    if (!allSelected) {
+      const warning = document.getElementById('matching-warning');
+      if (warning) warning.classList.add('visible');
+      return;
+    }
+
+    isAnswered = true;
     let correctCount = 0;
 
     pairs.forEach((pair, idx) => {
@@ -930,26 +1111,27 @@ export const generateQuizHtml = (title, questions, theme) => {
     });
 
     const isCorrect = correctCount === pairs.length;
-    const selects = els.optionsContainer.querySelectorAll('select');
-    
+
     selects.forEach((select, idx) => {
       select.disabled = true;
       const parentDiv = select.parentElement;
-      
+
       if (selectedMatches[idx] === pairs[idx].definition) {
         parentDiv.style.backgroundColor = 'rgba(34, 197, 94, 0.1)';
-        parentDiv.style.border = '2px solid #22c55e';
+        parentDiv.style.boxShadow = '0 0 0 2px #22c55e';
+        parentDiv.style.borderRadius = '10px';
       } else {
         parentDiv.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-        parentDiv.style.border = '2px solid #ef4444';
+        parentDiv.style.boxShadow = '0 0 0 2px #ef4444';
+        parentDiv.style.borderRadius = '10px';
       }
     });
 
-    // Hide the confirm button after answering
+    // Ocultar botón de confirmar y advertencia
     const submitBtn = document.getElementById('matching-submit-btn');
-    if (submitBtn) {
-      submitBtn.style.display = 'none';
-    }
+    if (submitBtn) submitBtn.style.display = 'none';
+    const warning = document.getElementById('matching-warning');
+    if (warning) warning.style.display = 'none';
 
     if (isCorrect) {
       score++;
@@ -1022,21 +1204,33 @@ export const generateQuizHtml = (title, questions, theme) => {
   }
 
   els.nextBtn.onclick = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      currentQuestionIndex++;
-      loadQuestion();
-    } else {
-      showResults();
-    }
+    els.questionContainer.style.opacity = '0';
+    setTimeout(() => {
+      if (currentQuestionIndex < questions.length - 1) {
+        currentQuestionIndex++;
+        loadQuestion();
+      } else {
+        showResults();
+      }
+      els.questionContainer.style.opacity = '1';
+    }, 200);
   };
 
   function showResults() {
     els.quizScreen.classList.add('hidden');
     els.resultsScreen.classList.remove('hidden');
-    
+
     const percentage = Math.round((score / questions.length) * 100);
     els.finalScore.textContent = percentage + '%';
     els.scoreFraction.textContent = \`\${score} / \${questions.length}\`;
+    els.progressBar.style.width = '100%';
+
+    // Emoji y mensaje según puntaje
+    if (percentage === 100) { els.resultsEmoji.textContent = '🏆'; els.resultsMessage.textContent = '¡Perfecto! ¡Excelente trabajo!'; }
+    else if (percentage >= 80) { els.resultsEmoji.textContent = '⭐'; els.resultsMessage.textContent = '¡Muy bien hecho!'; }
+    else if (percentage >= 60) { els.resultsEmoji.textContent = '👍'; els.resultsMessage.textContent = '¡Buen trabajo! Sigue así.'; }
+    else if (percentage >= 40) { els.resultsEmoji.textContent = '📚'; els.resultsMessage.textContent = 'Sigue estudiando, ¡lo lograrás!'; }
+    else { els.resultsEmoji.textContent = '💪'; els.resultsMessage.textContent = '¡No te rajes, vuelve a intentarlo!'; }
 
     if (percentage > 70) {
       triggerBigConfetti();
